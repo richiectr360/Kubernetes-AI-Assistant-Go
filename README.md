@@ -4,6 +4,14 @@
 
 `kubectl-assistant` is a CLI tool designed to help Kubernetes users generate and apply Kubernetes YAML manifests using OpenAI's GPT API. The tool simplifies the process of creating and managing Kubernetes resources by leveraging the power of large language models.
 
+### Project Architecture
+
+Enter this link:
+https://whimsical.com/kubernetes-ai-assistant-QQRMXwY9mJpAni9bSUuXXm
+
+Password:
+kubernetesaiassistant
+
 ## Problem Statement
 
 Managing Kubernetes resources can be complex and error-prone. Writing and maintaining Kubernetes YAML manifests manually requires in-depth knowledge of Kubernetes specifications and can be time-consuming. This complexity poses a significant challenge, especially for users who are not well-versed in Kubernetes.
