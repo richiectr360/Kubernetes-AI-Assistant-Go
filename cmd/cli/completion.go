@@ -1,4 +1,5 @@
 package cli
+
 //COMPLETE
 import (
 	"context"
@@ -13,14 +14,14 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-//define a struct having a field of type openai.Client
+// define a struct having a field of type openai.Client
 type oaiClients struct {
 	openAIClient openai.Client
 }
 
 // newOAIClients creates and returns a new instance of the oaiClients struct,
 // which contains the OpenAI clients used for making API calls.
-//you can get the open ai client directly or open ai via azure
+// you can get the open ai client directly or open ai via azure
 func newOAIClients() (oaiClients, error) {
 	//create a variable config of type openai.ClientConfig
 	var config openai.ClientConfig
@@ -28,8 +29,8 @@ func newOAIClients() (oaiClients, error) {
 	//we have to export openAIAPIKey in our terminals
 	//this variable (openAIAPIKey) and all others are defined in the root.go file
 	config = openai.DefaultConfig(*openAIAPIKey)
-//openAIEndpoint is a variable defined in the root.go file, we're checking here
-//if and another variable defined (openaiAPIURLv1) in root.go are same or not
+	//openAIEndpoint is a variable defined in the root.go file, we're checking here
+	//if and another variable defined (openaiAPIURLv1) in root.go are same or not
 	if openAIEndpoint != &openaiAPIURLv1 {
 		//we enter this loop if both the links are not equal, in many cases you might
 		//not even specify the endpoint and it'll go with APIURLv1 defined by default
@@ -38,24 +39,24 @@ func newOAIClients() (oaiClients, error) {
 			//if it is the open ai API via azure, we set it using DefaultAzureConfig function
 			//present in the open ai package
 			config = openai.DefaultAzureConfig(*openAIAPIKey, *openAIEndpoint)
-//if we have set the azureModelMap (in root.go file) and length is not zero
+			//if we have set the azureModelMap (in root.go file) and length is not zero
 			if len(*azureModelMap) != 0 {
-//then we assign that value to open ai config that needs to work with it
-//this is basically mapping for open ai to azure
+				//then we assign that value to open ai config that needs to work with it
+				//this is basically mapping for open ai to azure
 				config.AzureModelMapperFunc = func(model string) string {
 					return (*azureModelMap)[model]
 				}
 			}
 		} else {
-// if we're not using open ai via azure, we will assign the AIEndpoint to BaseURL 
+			// if we're not using open ai via azure, we will assign the AIEndpoint to BaseURL
 			config.BaseURL = *openAIEndpoint
 		}
 		//still crafting the config object, by specifying an API version
 		// use 2023-07-01-preview api version for function calls
 		config.APIVersion = "2023-07-01-preview"
 	}
-//passing the crafted config object to the NewClientWithConfig func. from open ai
-//and assigning it to the openAIClient field in oaiClients - a struct defined at the top of this file
+	//passing the crafted config object to the NewClientWithConfig func. from open ai
+	//and assigning it to the openAIClient field in oaiClients - a struct defined at the top of this file
 	clients := oaiClients{
 		openAIClient: *openai.NewClientWithConfig(config),
 	}
@@ -73,8 +74,8 @@ func getNonChatModels() []string {
 // It returns the generated completion string and an error if any.
 func gptCompletion(ctx context.Context, client oaiClients, prompts []string, deploymentName string) (string, error) {
 	temp := float32(*temperature)
-//we are going to create a prompt and going to append things to it and this is why
-//we set it to be strings.Builder instead of just strings
+	//we are going to create a prompt and going to append things to it and this is why
+	//we set it to be strings.Builder instead of just strings
 	var prompt strings.Builder
 
 	if *usek8sAPI {
@@ -94,7 +95,7 @@ func gptCompletion(ctx context.Context, client oaiClients, prompts []string, dep
 		// Append each prompt to the prompt builder.
 		fmt.Fprintf(&prompt, "%s", p)
 	}
-//define a variable resp for working with response object
+	//define a variable resp for working with response object
 	var resp string
 	var err error
 	//setting the max retires at 10 and then later also handling too many retries condition
@@ -109,18 +110,18 @@ func gptCompletion(ctx context.Context, client oaiClients, prompts []string, dep
 			//if the slice doesn't contain non chat models, then we call this
 			resp, err = client.openaiGptChatCompletion(ctx, &prompt, temp)
 		}
-//if there are any errors when making a request to the open ai API, they're accessible to us
-//through openai.RequestError and we assign it to the requestErr variable
+		//if there are any errors when making a request to the open ai API, they're accessible to us
+		//through openai.RequestError and we assign it to the requestErr variable
 		requestErr := &openai.RequestError{}
 		//err is the error from calling open ai, from the resp lines above
 		//errors.As helps us compare the err and requestErr, whether they're the same
 		if errors.As(err, &requestErr) {
-		//so if we have an error which is of type openai Request error, means we have some 
-		//issue while making a request, now we want to zero down on the issue, so we check if it
-		//has the status code of too many requests,which is 429 code
+			//so if we have an error which is of type openai Request error, means we have some
+			//issue while making a request, now we want to zero down on the issue, so we check if it
+			//has the status code of too many requests,which is 429 code
 			if requestErr.HTTPStatusCode == http.StatusTooManyRequests {
-		//if this is the case, it means the issue is retryable and we can rety
-		//the request after a certain delay
+				//if this is the case, it means the issue is retryable and we can rety
+				//the request after a certain delay
 				return retry.RetryableError(err)
 			}
 		}
