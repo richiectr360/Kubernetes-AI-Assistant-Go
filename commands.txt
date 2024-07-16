@@ -1,0 +1,5 @@
+- go run main.go "create an nginx deployment with 3 replicas"
+ dont apply
+
+
+ 
